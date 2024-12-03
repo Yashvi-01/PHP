@@ -27,7 +27,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@54.166.21.112 "pwd"
 
-a
+
       # # Step 4: SSH into EC2 to restart Apache service (or Nginx)
       # - name: Restart Apache on EC2
       #   run: |
