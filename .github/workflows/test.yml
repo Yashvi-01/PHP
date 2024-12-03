@@ -15,30 +15,30 @@ jobs:
       - name: Checkout the files
         uses: actions/checkout@v2
 
-      - name: Deploy to Server 1
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.HOST_DNS }}
-          REMOTE_USER: ${{ secrets.USERNAME }}
-          TARGET: ${{ secrets.TARGET_DIR }}
+      - name: Set up SSH for EC2 access
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo -e "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null" > ~/.ssh/config
 
-      - name: Executing remote ssh commands using ssh key
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST_DNS }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            sudo apt-get -y update
-            sudo apt-get install -y apache2 php libapache2-mod-php
-            
-            sudo apt-get install -y apache2
+      - name: Install dependencies and PHP on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.HOST_DNS }} << 'EOF'
+            sudo apt-get update
+            sudo apt-get install -y apache2 php libapache2-mod-php rsync
             sudo systemctl start apache2
             sudo systemctl enable apache2
-            cd home 
-            sudo mv * /var/www/html
+          EOF
+
+      - name: Rsync PHP files to EC2
+        run: |
+          rsync -avz -e "ssh -i ~/.ssh/id_rsa" ./ ubuntu@${{ secrets.HOST_DNS }}:/var/www/html/
+
+      - name: Set correct permissions on PHP files
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.HOST_DNS }} << 'EOF'
             sudo chown -R www-data:www-data /var/www/html/
             sudo chmod -R 755 /var/www/html/
-             sudo systemctl restart apache2
-            
+            sudo systemctl restart apache2
+          EOF
