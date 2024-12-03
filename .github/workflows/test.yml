@@ -31,9 +31,17 @@ jobs:
             sudo systemctl enable apache2
           EOF
 
-      - name: Rsync PHP files to EC2
+      - name: Install rsync on EC2
         run: |
-          rsync -avz -e "ssh -i ~/.ssh/id_rsa" ./ ubuntu@${{ secrets.HOST_DNS }}:/var/www/html/
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.HOST_DNS }} "sudo apt-get install -y rsync"
+
+      - name: Sync files to EC2 using rsync
+        run: |
+          rsync -avz -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" ./ ${REMOTE_USER}@${{ secrets.HOST_DNS }}:${{ secrets.TARGET_DIR }} -v
+
+      - name: Restart Apache on EC2 (optional)
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.HOST_DNS }} "sudo systemctl restart apache2"
 
       - name: Set correct permissions on PHP files
         run: |
