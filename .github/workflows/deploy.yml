@@ -25,7 +25,8 @@ jobs:
       # Step 3: Deploy the code to EC2 using rsync
       - name: Deploy to EC2 using rsync
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} "pwd"
+          ssh -o StrictHostKeyChecking=no ubuntu@54.166.21.112 "pwd"
+
 
       # # Step 4: SSH into EC2 to restart Apache service (or Nginx)
       # - name: Restart Apache on EC2
