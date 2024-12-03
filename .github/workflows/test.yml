@@ -31,7 +31,14 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             sudo apt-get -y update
+            sudo apt-get install -y apache2 php libapache2-mod-php
+            
             sudo apt-get install -y apache2
             sudo systemctl start apache2
             sudo systemctl enable apache2
-            cd home
+            cd home 
+            sudo mv * /var/www/html
+            sudo chown -R www-data:www-data /var/www/html/
+            sudo chmod -R 755 /var/www/html/
+             sudo systemctl restart apache2
+            
