@@ -1,3 +1,4 @@
+
 name: Deploy PHP App to EC2
 
 on:
@@ -25,8 +26,7 @@ jobs:
       # Step 3: Deploy the code to EC2 using rsync
       - name: Deploy to EC2 using rsync
         run: |
-         rsync -avz --exclude='.git' ./ ubuntu@${{ secrets.EC2_PUB }}:/home/ubuntu/php
-
+         rsync -avz --exclude='.git' -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" ./ ubuntu@${{ secrets.EC2_PUB }}:/home/ubuntu/php
 
       # Step 4: SSH into EC2 to restart Apache (or Nginx) service
       - name: Restart Apache on EC2
