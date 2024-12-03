@@ -17,13 +17,14 @@ jobs:
       # Step 2: Set up SSH for EC2 access using the secret SSH private key
       - name: Set up SSH for EC2 access
         run: |
+         apt-get install openssh-client -y && apt-get update
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY_PHP" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           echo -e "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null" > ~/.ssh/config
 
       # Step 3: Deploy the code to EC2 using rsync
-      - name: Deploy to EC2 using rsync
+      - name: Deploy to EC2 using ssh
         run: |
           ssh -v -o StrictHostKeyChecking=no ubuntu@54.166.21.112 "pwd"
 
