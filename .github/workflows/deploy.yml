@@ -1,0 +1,35 @@
+name: Deploy PHP App to EC2
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up SSH for EC2 access using the secret SSH private key
+      - name: Set up SSH for EC2 access
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY_PHP" > ~/.ssh/id_rsa  # Write the private key into the id_rsa file
+          chmod 600 ~/.ssh/id_rsa  # Set the correct file permissions
+          ssh-keyscan -H ${{ secrets.EC2_PUB }} >> ~/.ssh/known_hosts  # Add EC2 public IP to known hosts
+
+      # Step 3: Deploy the code to EC2 using rsync
+      - name: Deploy to EC2 using rsync
+        run: |
+          rsync -avz --exclude='.git' -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" ./ ubuntu@${{ secrets.EC2_PUB }}:/home/ubuntu/php
+
+      # Step 4: SSH into EC2 to restart Apache service (or Nginx)
+      - name: Restart Apache on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUB }} << 'EOF'
+            sudo systemctl restart apache2  # Use 'nginx' if you're using Nginx
+          EOF
