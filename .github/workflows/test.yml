@@ -33,7 +33,7 @@ jobs:
 
       - name: Install rsync on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.HOST_DNS }} "sudo apt-get install -y rsync"
+          ssh -v -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.HOST_DNS }} "sudo apt-get install -y rsync"
 
       - name: Sync files to EC2 using rsync
         run: |
