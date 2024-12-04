@@ -1,45 +1,47 @@
-name: Push-to-EC2
+name: Deploy to EC2
 
-# Trigger deployment only on push to main branch
 on:
   push:
     branches:
-      - main
+      - main  # Trigger on push to main branch
 
 jobs:
   deploy:
-    name: Deploy to EC2 on master branch push
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use GitHub hosted runner (Ubuntu)
 
     steps:
-      - name: Checkout the files
+      # Step 1: Checkout the repository
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Optional: Additional commands for configuring Apache or services on EC2
-      - name: Configure Apache and deploy files
+      # Step 2: Set up SSH and deploy to EC2
+      - name: Set up SSH and connect to EC2
         run: |
-          # Add SSH key and connect to EC2
+          # Create .ssh directory and set correct permissions
+          mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST_DNS }} >> ~/.ssh/known_hosts
           
-          # Connect to EC2 and run commands
-          ssh -i ~/.ssh/id_rsa ${USER}@${{ secrets.HOST_DNS }} <<EOF
-            # Update and install Apache
-            sudo apt-get update -y
-            sudo apt-get install -y apache2
-            sudo systemctl start apache2
-            sudo systemctl enable apache2
-            
-            # Clean existing files in the default web directory
-            sudo rm -rf /var/www/html/*
+          # Add EC2 host to known_hosts to avoid authenticity warnings
+          ssh-keyscan -H ${{ secrets.EC2_HOST_DNS }} >> ~/.ssh/known_hosts
 
-            # Copy the project files to the Apache web directory
-            sudo cp -r /home/ubuntu /var/www/html/
+          # Run commands on the EC2 instance
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_HOST_DNS }} << EOF
+            # Update and install necessary packages
+            #sudo apt-get update -y
+            #sudo apt-get install -y apache2
 
-            # Set the correct ownership and permissions for Apache
-            sudo chown -R www-data:www-data /var/www/html/
-            sudo chmod -R 755 /var/www/html/
+            # Start Apache and enable it to start on boot
+            #sudo systemctl start apache2
+            #sudo systemctl enable apache2
+
+            # Clean the default web directory
+            #sudo rm -rf /var/www/html/*
+
+            # Copy the repository content to Apache web directory
+            #sudo cp -r /home/ubuntu/your_project/* /var/www/html/
+
+            # Set ownership and permissions for Apach
 
             echo "Deployment completed successfully!"
           EOF
