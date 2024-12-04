@@ -20,9 +20,9 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      - name: Deploy to Server using rsync
-        run: |
-          rsync -avz --exclude='.git' ./ ${USER}@${{ secrets.HOST_DNS }}:${{ secrets.TARGET_DIR }}
+   #   - name: Deploy to Server using rsync
+    #    run: |
+     #     rsync -avz --exclude='.git' ./ ${USER}@${{ secrets.HOST_DNS }}:${{ secrets.TARGET_DIR }}
 
       - name: Execute remote SSH commands
         uses: appleboy/ssh-action@v0.1.5  # Stable version
