@@ -41,3 +41,4 @@ jobs:
             echo "Deployment completed successfully!"
             pwd
           EOF
+        shell: bash
