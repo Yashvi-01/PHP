@@ -4,17 +4,17 @@ on:
   push:
     branches:
       - main  # Trigger on push to the 'main' branch
+env:
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      EC2_HOST_DNS: ${{ secrets.HOST_DNS }}
+      EC2_USER: ${{ secrets.USERNAME }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest  # Use GitHub-hosted runner (Ubuntu)
 
     # Define global environment variables for the entire job
-    env:
-      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-      EC2_HOST_DNS: ${{ secrets.HOST_DNS }}
-      EC2_USER: ${{ secrets.USERNAME }}
-
+   
     steps:
       # Step 1: Checkout the repository
       - name: Checkout repository
