@@ -35,3 +35,6 @@ jobs:
           ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST_DNS << EOF
             # Update and install necessary packages
             sudo apt-get update -y
+            pwd 
+             echo "Deployment completed successfully!"
+          EOF
