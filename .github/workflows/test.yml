@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Step 2: Set up SSH and deploy to EC2
+      # Step 2: Set up SSH and connect to EC2
       - name: Set up SSH and connect to EC2
         run: |
           # Create .ssh directory and set correct permissions
@@ -27,21 +27,4 @@ jobs:
 
           # Run commands on the EC2 instance
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_HOST_DNS }} << EOF
-            # Update and install necessary packages
-            #sudo apt-get update -y
-            #sudo apt-get install -y apache2
-
-            # Start Apache and enable it to start on boot
-            #sudo systemctl start apache2
-            #sudo systemctl enable apache2
-
-            # Clean the default web directory
-            #sudo rm -rf /var/www/html/*
-
-            # Copy the repository content to Apache web directory
-            #sudo cp -r /home/ubuntu/your_project/* /var/www/html/
-
-            # Set ownership and permissions for Apach
-
-            echo "Deployment completed successfully!"
-          EOF
+           sudo apt-get update -y
