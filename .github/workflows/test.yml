@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest  # Use GitHub-hosted runner (Ubuntu)
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      # # Step 1: Checkout the repository
+      # - name: Checkout repository
+      #   uses: actions/checkout@v2
 
       # Step 2: Set up SSH and connect to EC2
       - name: Set up SSH and connect to EC2
