@@ -33,7 +33,7 @@
         - name: Deploy files to EC2
           run: |
             # Use rsync to copy the files from the repository to the EC2 instance
-            rsync -avz --exclude='.git' ./ $EC2_USER@$EC2_HOST_DNS:/home/$EC2_USER  # Adjust the destination directory
+            #rsync -avz --exclude='.git' ./ $EC2_USER@$EC2_HOST_DNS:/home/$EC2_USER  # Adjust the destination directory
             
             # Run commands on the EC2 instance
             ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST_DNS << EOF
