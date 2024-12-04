@@ -42,7 +42,7 @@ jobs:
             cd /var/www/html
 
             # If you need to copy files from a directory like /home/ubuntu/your_project
-            sudo cp -r /home/ubuntu/your_project/* /var/www/html/
+            sudo cp -r /home/ubuntu /var/www/html/
 
             # Set the correct ownership and permissions for Apache
             sudo chown -R www-data:www-data /var/www/html/
