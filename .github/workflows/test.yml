@@ -1,51 +1,48 @@
-name: Deploy to EC2
+  name: Deploy to EC2
 
-on:
-  push:
-    branches:
-      - main  # Trigger on push to the 'main' branch
+  on:
+    push:
+      branches:
+        - main  # Trigger on push to the 'main' branch
+  env:
+        EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        EC2_HOST_DNS: ${{ secrets.HOST_DNS }}
+        EC2_USER: ${{ secrets.USERNAME }}
 
-env:
-  EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-  EC2_HOST_DNS: ${{ secrets.HOST_DNS }}
-  EC2_USER: ${{ secrets.USERNAME }}
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest  # Use GitHub-hosted runner (Ubuntu)
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest  # Use GitHub-hosted runner (Ubuntu)
+      # Define global environment variables for the entire job
+    
+      steps:
+        # Step 1: Checkout the repository
+        - name: Checkout repository
+          uses: actions/checkout@v2
 
-    steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      # Step 2: Set up SSH and deploy files to EC2
-      - name: Set up SSH and deploy files
-        run: |
-          # Create .ssh directory and set correct permissions
-          mkdir -p ~/.ssh
-          echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa  # Use the environment variable
-          chmod 600 ~/.ssh/id_rsa
-          
-          # Add EC2 host to known_hosts to avoid authenticity warnings
-          ssh-keyscan -H $EC2_HOST_DNS >> ~/.ssh/known_hosts  # Use the environment variable
-
-          # Use rsync to copy the files from the repository to the EC2 instance
-          rsync -avz --exclude='.git' ./ $EC2_USER@$EC2_HOST_DNS:/home/$EC2_USER  # Adjust the destination directory
-          
-          # Run commands on the EC2 instance
-          ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST_DNS << EOF
-            # Navigate to the directory
-            cd /home/$EC2_USER
+        # Step 2: Set up SSH and connect to EC2
+        - name: Set up SSH and connect to EC2
+          run: |
+            # Create .ssh directory and set correct permissions
+            mkdir -p ~/.ssh
+            echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa  # Use the environment variable
+            chmod 600 ~/.ssh/id_rsa
             
-            # Ensure correct ownership and permissions for files
+            # Add EC2 host to known_hosts to avoid authenticity warnings
+            ssh-keyscan -H $EC2_HOST_DNS >> ~/.ssh/known_hosts  # Use the environment variable
+         - name: Deploy files to EC2
+           run: |
+            # Use rsync to copy the files from the repository to the EC2 instance
+            rsync -avz --exclude='.git' ./ $EC2_USER@$EC2_HOST_DNS:/home/$EC2_USER  # Adjust the destination directory
+            
+            # Run commands on the EC2 instance
+            ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST_DNS << EOF
+            cd /home/$EC2_USER
             sudo chown -R www-data:www-data /home/$EC2_USER
-            sudo chmod -R 755 /home/$EC2_USER
+              sudo chmod -R 755 /home/$EC2_USER
 
-            # Update and install necessary packages
-            sudo apt-get update -y
-
-            # Run any other setup commands here, like installing dependencies
-            echo "Deployment completed successfully!"
-          EOF
-
+              # Update and install necessary packages
+              sudo apt-get update -y
+              pwd 
+              echo "Deployment completed successfully!"
+            EOF
