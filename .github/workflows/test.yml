@@ -25,7 +25,7 @@ jobs:
           # Create .ssh directory and set correct permissions
           mkdir -p ~/.ssh
           pwd
-          # echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa  # Use the environment variable for the private key
+          # echo "$EC2_SSH_KEY" >> ~/.ssh/id_rsa  # Use the environment variable for the private key
           # chmod 600 ~/.ssh/id_rsa  # Ensure private key has correct permissions
 
           # Add EC2 host to known_hosts to avoid authenticity warnings
