@@ -30,8 +30,8 @@
             
             # Add EC2 host to known_hosts to avoid authenticity warnings
             ssh-keyscan -H $EC2_HOST_DNS >> ~/.ssh/known_hosts  # Use the environment variable
-         - name: Deploy files to EC2
-           run: |
+        - name: Deploy files to EC2
+          run: |
             # Use rsync to copy the files from the repository to the EC2 instance
             rsync -avz --exclude='.git' ./ $EC2_USER@$EC2_HOST_DNS:/home/$EC2_USER  # Adjust the destination directory
             
