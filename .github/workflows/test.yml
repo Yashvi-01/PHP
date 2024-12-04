@@ -27,9 +27,9 @@ jobs:
           echo "EC2_USER: $EC2_USER"
           
           # Create .ssh directory and set correct permissions
-          #mkdir -p ~/.ssh
-          #echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa  # Use environment variable for SSH key
-          #chmod 600 ~/.ssh/id_rsa  # Ensure the private key has the correct permissions
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa  # Use environment variable for SSH key
+          chmod 600 ~/.ssh/id_rsa  # Ensure the private key has the correct permissions
           
           # Add EC2 host to known_hosts to avoid authenticity warnings
           #ssh-keyscan -H $EC2_HOST_DNS >> ~/.ssh/known_hosts
