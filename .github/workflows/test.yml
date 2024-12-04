@@ -23,16 +23,16 @@ jobs:
       - name: Set up SSH and connect to EC2
         run: |
           # Create .ssh directory and set correct permissions
-          mkdir -p ~/.ssh
+          # mkdir -p ~/.ssh
           pwd
-          echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa  # Use the environment variable for the private key
-          chmod 600 ~/.ssh/id_rsa  # Ensure private key has correct permissions
+          # echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa  # Use the environment variable for the private key
+          # chmod 600 ~/.ssh/id_rsa  # Ensure private key has correct permissions
 
           # Add EC2 host to known_hosts to avoid authenticity warnings
-          ssh-keyscan -H $HOST_DNS >> ~/.ssh/known_hosts
+          # ssh-keyscan -H $HOST_DNS >> ~/.ssh/known_hosts
 
           # Test SSH connection to EC2
-          ssh -i ~/.ssh/id_rsa $USERNAME@$HOST_DNS "echo 'SSH connection successful!'"
+          ssh -i $EC2_SSH_KEY $USERNAME@$HOST_DNS "echo 'SSH connection successful!'"
 
           # Run commands on the EC2 instance
           ssh -i ~/.ssh/id_rsa $USERNAME@$HOST_DNS << EOF
