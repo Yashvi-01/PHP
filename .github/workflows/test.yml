@@ -15,24 +15,37 @@ jobs:
       - name: Checkout the files
         uses: actions/checkout@v2
 
-      - name: Deploy to Server 1
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.HOST_DNS }}
-          REMOTE_USER: ${{ secrets.USERNAME }}
-          TARGET: ${{ secrets.TARGET_DIR }}
+      - name: Set up SSH for deployment
+        uses: webfactory/ssh-agent@v0.5.3  # A more stable version of the SSH agent action
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      - name: Executing remote ssh commands using ssh key
-        uses: appleboy/ssh-action@master
+      - name: Deploy to Server using rsync
+        run: |
+          rsync -avz --exclude='.git' ./ ${USER}@${{ secrets.HOST_DNS }}:${{ secrets.TARGET_DIR }}
+
+      - name: Execute remote SSH commands
+        uses: appleboy/ssh-action@v0.1.5  # Stable version
         with:
           host: ${{ secrets.HOST_DNS }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo apt-get -y update
+            set -e  # Exit on any error
+            # Update and install necessary software
+            sudo apt-get update -y
             sudo apt-get install -y apache2
             sudo systemctl start apache2
             sudo systemctl enable apache2
-            cd home
-            sudo mv * /var/www/html
+            
+            # Correct directory path and deploy files
+            cd /var/www/html
+
+            # If you need to copy files from a directory like /home/ubuntu/your_project
+            sudo cp -r /home/ubuntu/your_project/* /var/www/html/
+
+            # Set the correct ownership and permissions for Apache
+            sudo chown -R www-data:www-data /var/www/html/
+            sudo chmod -R 755 /var/www/html/
+
+            echo "Deployment completed successfully!"
