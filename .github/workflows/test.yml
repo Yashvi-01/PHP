@@ -1,46 +1,50 @@
- name: Deploy to EC2
- on:
-    push:
-      branches:
-        - main  # Trigger on push to the 'main' branch
- env:
-        EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-        EC2_HOST_DNS: ${{ secrets.HOST_DNS }}
-        EC2_USER: ${{ secrets.USERNAME }}
+name: Deploy to EC2
 
- jobs:
-    deploy:
-      runs-on: ubuntu-latest  # Use GitHub-hosted runner (Ubuntu)
+on:
+  push:
+    branches:
+      - main  # Trigger on push to main branch
 
-      # Define global environment variables for the entire job
-    
-      steps:
-        # Step 1: Checkout the repository
-        - name: Checkout repository
-          uses: actions/checkout@v2
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Use GitHub hosted runner (Ubuntu)
 
-        # Step 2: Set up SSH and connect to EC2
-        - name: Set up SSH and connect to EC2
-          run: |
-            # Create .ssh directory and set correct permissions
-            mkdir -p ~/.ssh
-            echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa  # Use the environment variable
-            chmod 600 ~/.ssh/id_rsa
-            
-            # Add EC2 host to known_hosts to avoid authenticity warnings
-            ssh-keyscan -H $EC2_HOST_DNS >> ~/.ssh/known_hosts  # Use the environment variable
-        - name: Deploy files to EC2
-          run: |
-            # Use rsync to copy the files from the repository to the EC2 instance
-            #rsync -avz --exclude='.git' ./ $EC2_USER@$EC2_HOST_DNS:/home/$EC2_USER  # Adjust the destination directory
-            
-            # Run commands on the EC2 instance
-            ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST_DNS << EOF
-            cd /home/$EC2_USER
-            sudo chown -R www-data:www-data /home/$EC2_USER
-              sudo chmod -R 755 /home/$EC2_USER
-              # Update and install necessary packages
-              sudo apt-get update -y
-              pwd 
-              echo "Deployment completed successfully!"
-            EOF
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Set up SSH and deploy to EC2
+      - name: Set up SSH and connect to EC2
+        run: |
+          # Create .ssh directory and set correct permissions
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Add EC2 host to known_hosts to avoid authenticity warnings
+          ssh-keyscan -H ${{ secrets.EC2_HOST_DNS }} >> ~/.ssh/known_hosts
+
+          # Run commands on the EC2 instance
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_HOST_DNS }} << EOF
+            # Update and install necessary packages
+            sudo apt-get update -y
+           #sudo apt-get install -y apache2
+
+            # Start Apache and enable it to start on boot
+            #sudo systemctl start apache2
+            #sudo systemctl enable apache2
+
+            # Clean the default web directory
+            #sudo rm -rf /var/www/html/*
+
+            # Copy the repository content to Apache web directory
+            #sudo cp -r /home/ubuntu/your_project/* /var/www/html/
+
+            # Set ownership and permissions for Apache
+            #sudo chown -R www-data:www-data /var/www/html/
+            #sudo chmod -R 755 /var/www/html/
+
+            echo "Deployment completed successfully!"
+            pwd
+          EOF
