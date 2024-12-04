@@ -12,7 +12,7 @@ env:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Use GitHub-hosted runner (Ubuntu)
+    runs-on: ubuntu22  # Use GitHub-hosted runner (Ubuntu)
 
     steps:
       # # Step 1: Checkout the repository
@@ -23,10 +23,10 @@ jobs:
       - name: Set up SSH and connect to EC2
         run: |
           # Create .ssh directory and set correct permissions
-          mkdir -p ~/.ssh
+          mkdir -p ~/.test
           pwd
-          # echo "$EC2_SSH_KEY" >> ~/.ssh/id_rsa  # Use the environment variable for the private key
-          # chmod 600 ~/.ssh/id_rsa  # Ensure private key has correct permissions
+          echo "$EC2_SSH_KEY" > ~/.test/key  # Use the environment variable for the private key
+          chmod 600 ~/.test/key  # Ensure private key has correct permissions
 
           # Add EC2 host to known_hosts to avoid authenticity warnings
           # ssh-keyscan -H $HOST_DNS >> ~/.ssh/known_hosts
