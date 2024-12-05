@@ -26,6 +26,14 @@ jobs:
           mkdir -p ~/.test
           echo "$EC2_SSH_KEY" > ~/.test/key.pem
           chmod 400 ~/.test/key.pem
-          ssh -i ~/.test/key.pem -o "StrictHostKeyChecking no" -tt "$EC2_USERNAME"@"$EC2_HOST" "ls -l /home/$EC2_USERNAME/index.php"
+
+      - name: Upload Files to EC2 (to /var/www/html)
+        run: |
+          # Upload index.php or other files to /var/www/html for web apps
+          scp -i ~/.test/key.pem -o "StrictHostKeyChecking=no" ./index.php "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
+
+      - name: verify uploaded files
+        run: |         
+          ssh -i ~/.test/key.pem -o "StrictHostKeyChecking no" -tt "$EC2_USERNAME"@"$EC2_HOST" "ls -l /var/www/html/index.php"
           pwd
           ls
