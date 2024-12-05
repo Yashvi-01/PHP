@@ -12,4 +12,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2 
-        
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa  # Secure the private key
+
+      - name: Add EC2 host to known hosts
+        run: |
+          ssh-keyscan -H <EC2_PUBLIC_IP> >> ~/.ssh/known_hosts
+
+      - name: SSH into EC2 instance
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@44.204.195.131 "echo 'Successfully connected to EC2!'"
