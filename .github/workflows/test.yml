@@ -1,44 +1,15 @@
-name: Deploy to EC2
+name: SSH into EC2 instance
 
 on:
   push:
     branches:
-      - main  # Trigger on push to the 'main' branch
-
-env:
-  EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}  # The private SSH key
-  HOST_DNS: ${{ secrets.HOST_DNS }}  # EC2 host DNS
-  USERNAME: ${{ secrets.USERNAME }}  # EC2 username (e.g., 'ubuntu' for Ubuntu instances)
+      - main  # Trigger on push to the main branch
 
 jobs:
-  deploy:
-    runs-on: ubuntu22  # Use GitHub-hosted runner (Ubuntu)
-
+  ssh-to-ec2:
+    runs-on: ubuntu-latest 
+    
     steps:
-      # # Step 1: Checkout the repository
-      # - name: Checkout repository
-      #   uses: actions/checkout@v2
-
-      # Step 2: Set up SSH and connect to EC2
-      - name: Set up SSH and connect to EC2
-        run: |
-          # Create .ssh directory and set correct permissions
-          mkdir -p ~/.test
-          pwd
-          echo "$EC2_SSH_KEY" > ~/.test/key  # Use the environment variable for the private key
-          chmod 600 ~/.test/key  # Ensure private key has correct permissions
-
-          # Add EC2 host to known_hosts to avoid authenticity warnings
-          # ssh-keyscan -H $HOST_DNS >> ~/.ssh/known_hosts
-
-          # Test SSH connection to EC2
-          # ssh -i $EC2_SSH_KEY $USERNAME@$HOST_DNS "echo 'SSH connection successful!'"
-
-          # Run commands on the EC2 instance
-          ssh -i ~/.ssh/id_rsa $USERNAME@$HOST_DNS << EOF
-            # Update and install necessary packages
-            sudo apt-get update -y
-            echo "Deployment completed successfully!"
-            pwd
-          EOF
-        shell: bash
+      - name: Checkout code
+        uses: actions/checkout@v2 
+        
