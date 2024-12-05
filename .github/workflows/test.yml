@@ -21,7 +21,7 @@ jobs:
      
       - name: Add EC2 host to known hosts
         run: |
-          sudo ssh-keyscan -H 44.204.195.131 >> ~/.ssh/known_hosts 
+          sudo ssh-keyscan -H 44.204.195.131.compute-1.amazonaws.com >> ~/.ssh/known_hosts 
 
 
       - name: SSH into EC2 instance
