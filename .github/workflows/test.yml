@@ -33,7 +33,7 @@ jobs:
 
       - name: push to ec2
         run: | 
-          docker save my-website | ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" 'dockerload'
+          docker save my-website | ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" 'docker load'
 
       - name: run the cont. on ec2
         run: | 
@@ -41,7 +41,6 @@ jobs:
 
           sudo docker run -d --name my-web-container -p 80:80 my-website
           EOF
-          
           
       - name: verify uploaded files
         run: |         
