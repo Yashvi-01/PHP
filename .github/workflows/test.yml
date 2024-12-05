@@ -26,4 +26,4 @@ jobs:
 
       - name: SSH into EC2 instance
         run: |
-          ssh -o StrictHostKeyChecking=yes ubuntu@44.204.195.131 "echo 'Successfully connected to EC2!'"
+          ssh -o StrictHostKeyChecking=no ubuntu@ec2-44-204-195-131.compute-1.amazonaws.com "echo 'Successfully connected to EC2!'"
