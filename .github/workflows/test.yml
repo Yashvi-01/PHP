@@ -3,7 +3,7 @@ name: EC2 SSH Login with Password
 on:
   push:
     branches:
-      - main  # This can be adjusted based on your needs
+      - main  # This can be adjusted based on your need
 env:
   EC2_HOST: ${{ secrets.EC2_HOST }}
   EC2_USERNAME: ${{ secrets.USERNAME }}
