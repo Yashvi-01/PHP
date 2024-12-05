@@ -1,28 +1,25 @@
-name: SSH into EC2 instance
+name: EC2 SSH Login with Password
 
 on:
   push:
     branches:
-      - main  # Trigger on push to the main branch
+      - main  # This can be adjusted based on your needs
 
 jobs:
-  ssh-to-ec2:
-    runs-on: ubuntu-latest 
-    
+  deploy:
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2 
+      - name: Checkout the repository
+        uses: actions/checkout@v2
 
-         - name: Set up SSH key
-        run: |
-          mkdir -p ~/.test
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.test/file
-          chmod 600 ~/.test/file  # Secure the private key
+      - name: Set up SSH Client
+        run: sudo apt-get install -y openssh-client
 
-      - name: Add EC2 host to known hosts
+      - name: Log into EC2 instance
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USERNAME: ${{ secrets.USERNAME }}
+          EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
         run: |
-          ssh-keyscan -H <EC2_PUBLIC_IP> >> ~/.ssh/known_hosts
-
-      - name: SSH into EC2 instance
-        run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@<EC2_PUBLIC_IP> "echo 'Successfully connected to EC2!'"
+          echo "$EC2_PASSWORD" | sshpass ssh -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST 'echo "Successfully logged in"'
