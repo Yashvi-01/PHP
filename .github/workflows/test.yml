@@ -22,4 +22,4 @@ jobs:
           EC2_USERNAME: ${{ secrets.USERNAME }}
           EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
         run: |
-          echo "$EC2_PASSWORD" | sshpass ssh -o StrictHostKeyChecking=no $USERNAME@$EC2_HOST 'echo "Successfully logged in"'
+          echo "$EC2_PASSWORD" | sshpass ssh -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST 'echo "Successfully logged in"'
