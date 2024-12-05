@@ -30,7 +30,7 @@ jobs:
       - name: Upload Files to EC2 (to /var/www/html)
         run: |
           # Upload index.php or other files to /var/www/html for web apps
-             rsync -avz --exclude=".git" -e "ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no" "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
+             rsync -avz --exclude=".git" -e "ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no" ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
 
       - name: verify uploaded files
         run: |         
