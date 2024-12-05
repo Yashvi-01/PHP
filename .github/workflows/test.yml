@@ -27,3 +27,5 @@ jobs:
           echo "$EC2_SSH_KEY" > ~/.test/key.pem
           chmod 400 ~/.test/key.pem
           ssh -i ~/.test/key.pem -o "StrictHostKeyChecking no" -tt "$EC2_USERNAME"@"$EC2_HOST" "echo hello from yashvi! > testfile1"
+          pwd
+          ls
