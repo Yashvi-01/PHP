@@ -17,7 +17,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/yashvi-2.pem
-          chmod 600 ~/.ssh/id_rsa  # Secure the private key
+          chmod 600 ~/.ssh/yashvi-2.pem  # Secure the private key
      
       - name: Add EC2 host to known hosts
         run: |
