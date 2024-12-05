@@ -21,16 +21,9 @@ jobs:
       - name: Set up SSH Client
         run: sudo apt-get install -y openssh-client
 
-      - name: test ssh key
+      - name: Login to Instance
         run: |
           mkdir -p ~/.test
           echo "$EC2_SSH_KEY" > ~/.test/key.pem
           chmod 400 ~/.test/key.pem
-          ssh -i ~/.test/key.pem -o "StrictHostKeyChecking no" -tt "$EC2_USERNAME"@"$EC2_HOST" pwd
-          pwd > logs.txt
-          whoami > logs.txt
-          cat logs.txt
-
-      - name: Log into EC2 instance
-        run: |
-          echo "$EC2_PASSWORD" | sshpass ssh -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST 'echo "Successfully logged in"'
+          ssh -i ~/.test/key.pem -o "StrictHostKeyChecking no" -tt "$EC2_USERNAME"@"$EC2_HOST" "echo test > testfile1"
