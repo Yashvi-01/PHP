@@ -3,7 +3,7 @@ name: EC2 SSH Login with Password
 on:
   push:
     branches:
-      - main  # This can be adjusted based on your needs
+      - main  # This can be adjusted based on your need
 env:
   EC2_HOST: ${{ secrets.EC2_HOST }}
   EC2_USERNAME: ${{ secrets.USERNAME }}
@@ -26,4 +26,14 @@ jobs:
           mkdir -p ~/.test
           echo "$EC2_SSH_KEY" > ~/.test/key.pem
           chmod 400 ~/.test/key.pem
-          ssh -i ~/.test/key.pem -o "StrictHostKeyChecking no" -tt "$EC2_USERNAME"@"$EC2_HOST" "echo test > testfile1"
+
+      - name: Upload Files to EC2 (to /var/www/html)
+        run: |
+          # Upload index.php or other files to /var/www/html for web apps
+             rsync -avz --exclude=".git" -e "ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no" ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
+
+      - name: verify uploaded files
+        run: |         
+          ssh -i ~/.test/key.pem -o "StrictHostKeyChecking no" -tt "$EC2_USERNAME"@"$EC2_HOST" "ls -l /var/www/html/index.php"
+          pwd
+          ls
