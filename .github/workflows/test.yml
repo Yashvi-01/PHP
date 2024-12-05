@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main  # This can be adjusted based on your needs
-    env:
-      EC2_HOST: ${{ secrets.EC2_HOST }}
-      EC2_USERNAME: ${{ secrets.USERNAME }}
-      EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
-      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+env:
+  EC2_HOST: ${{ secrets.EC2_HOST }}
+  EC2_USERNAME: ${{ secrets.USERNAME }}
+  EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
+  EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
 
 jobs:
   deploy:
