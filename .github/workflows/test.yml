@@ -3,7 +3,7 @@ name: SSH into EC2 instance
 on:
   push:
     branches:
-      - main  # Trigger on push to the main branc
+      - main  # Trigger on push to the main bran
 
 jobs:
   ssh-to-ec2:
