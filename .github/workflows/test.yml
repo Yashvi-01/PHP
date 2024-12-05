@@ -25,6 +25,8 @@ jobs:
         run: |
           mkdir -p ~/.test
           echo "$EC2_SSH_KEY" > ~/.test/key
+          chmod 400 ~/.test/key
+          ssh -i ~/.test/key "$EC2_USERNAME"@"$EC2_HOST"
 
       - name: Log into EC2 instance
         run: |
