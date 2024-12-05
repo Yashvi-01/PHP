@@ -26,6 +26,6 @@ jobs:
           mkdir -p ~/.test
           echo "$EC2_SSH_KEY" > ~/.test/key.pem
           chmod 400 ~/.test/key.pem
-          ssh -i ~/.test/key.pem -o "StrictHostKeyChecking no" -tt "$EC2_USERNAME"@"$EC2_HOST" "echo hello from yashvi! > testfile1"
+          ssh -i ~/.test/key.pem -o "StrictHostKeyChecking no" -tt "$EC2_USERNAME"@"$EC2_HOST" "ls -l /home/$EC2_USERNAME/index.php"
           pwd
           ls
