@@ -16,6 +16,10 @@ jobs:
       - name: Set up SSH Client
         run: sudo apt-get install -y openssh-client
 
+      - name: test ssh key
+        run: |
+          - mkdir -p ~/.test
+
       - name: Log into EC2 instance
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
