@@ -27,13 +27,23 @@ jobs:
           echo "$EC2_SSH_KEY" > ~/.test/key.pem
           chmod 400 ~/.test/key.pem
 
-      - name: Upload Files to EC2 (to /var/www/html)
+      - name: build docker image
         run: |
-          # Upload index.php or other files to /var/www/html for web apps
-             rsync -avz --exclude=".git" -e "ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no" ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
+          docker build -t my-website .
 
+      - name: push to ec2
+        run: | 
+          docker save my-website | ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" 'dockerload'
+
+      - name: run the cont. on ec2
+        run: | 
+          ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF
+
+          sudo docker run -d --name my-web-container -p 80:80 my-website
+          EOF
+          
+          
       - name: verify uploaded files
         run: |         
           ssh -i ~/.test/key.pem -o "StrictHostKeyChecking no" -tt "$EC2_USERNAME"@"$EC2_HOST" "ls -l /var/www/html/index.php"
-          sudo systemctl restart apache2
-          ls
+          
