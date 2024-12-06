@@ -51,14 +51,12 @@ jobs:
         run: |
           sudo apt-get install -y openssh-client 
             mkdir -p ~/.test
-          echo "$EC2_SSH_KEY" > ~/.test/key.pem
+            echo "$EC2_SSH_KEY" > ~/.test/key.pem
           chmod 400 ~/.test/key.pem
 
       - name: SSH into EC2 and run Docker container
         run: |
-           ssh -i  ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF
-           echo "connected to ec2"
-           scp -i ~/.test/key.pem -r ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
+           rsync -avz --exclude=".git" -e "ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no" ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
            sudo chown -R www-data:www-data /var/www/html/
            sudo chmod -R 755 /var/www/html/
              sudo systemctl start apache2
@@ -67,8 +65,6 @@ jobs:
 
            docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
            docker run -dit --name my-php-container -p 80:80 $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
-             docker ps
-            ls -l /home/$EC2_USERNAME
            EOF
 
       - name: Verify Docker container is running on EC2
