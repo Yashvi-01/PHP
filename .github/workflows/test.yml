@@ -57,8 +57,9 @@ jobs:
           chmod 400 ~/.ssh/key.pem
 
            ssh -i ~/.ssh/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF         
-           rsync -avz --exclude=".git" -e "ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no" "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
-            cd /home/$EC2_USERNAME
+           rsync -avz --exclude=".git" -e "ssh -i ~/.ssh/key.pem -o StrictHostKeyChecking=no" ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
+
+            ls -l /var/www/html/
           aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
           docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
