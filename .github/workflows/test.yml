@@ -1,4 +1,4 @@
-name: EC2 SSH Login with Password
+name: deploy docker to EC2 and ECR 
 
 on:
   push:
@@ -53,20 +53,16 @@ jobs:
             mkdir -p ~/.test
             echo "$EC2_SSH_KEY" > ~/.test/key.pem
           chmod 400 ~/.test/key.pem
-
+            ssh-keyscan -H "$EC2_HOST" >> ~/.test/known_hosts
+      
       - name: SSH into EC2 and run Docker container
         run: |
-           rsync -avz --exclude=".git" -e "ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no" ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
-           sudo chown -R www-data:www-data /var/www/html/
-           sudo chmod -R 755 /var/www/html/
-             sudo systemctl start apache2
-           ls -l /var/www/html/
-           aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-
-           docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
-           docker run -dit --name my-php-container -p 80:80 $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+           ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF
+            docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+           docker run -d --name my-php-container -p 8080:80 $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+           sudo docker ps
            EOF
 
       - name: Verify Docker container is running on EC2
         run: |
-          ssh -i  ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" "docker ps"
+          ssh -i  ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" "sudo docker ps"
