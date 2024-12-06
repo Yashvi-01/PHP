@@ -52,12 +52,12 @@ jobs:
 
       - name: SSH into EC2 and run Docker container
         run: |
-          mkdir -p ~/.ssh
-          echo "$EC2_SSH_KEY" > ~/.ssh/key.pem
-          chmod 400 ~/.ssh/key.pem
+          mkdir -p ~/.test
+          echo "$EC2_SSH_KEY" > ~/.test/key.pem
+          chmod 400 ~/.test/key.pem
 
-           ssh -i ~/.ssh/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF         
-          sudo rsync -avz --exclude=".git" -e "ssh -i ~/.ssh/key.pem -o StrictHostKeyChecking=no" ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
+           ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF         
+          sudo rsync -avz --exclude=".git" -e "ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no" ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
 
             ls -l /var/www/html/
           aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
@@ -71,6 +71,6 @@ jobs:
 
       - name: Verify Docker container is running on EC2
         run: |
-          ssh -i ~/.ssh/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" "docker ps"
+          ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" "docker ps"
         
         
