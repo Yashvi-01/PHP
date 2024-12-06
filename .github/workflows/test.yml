@@ -72,5 +72,3 @@ jobs:
       - name: Verify Docker container is running on EC2
         run: |
           ssh -i  ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" "docker ps"
-        
-        
