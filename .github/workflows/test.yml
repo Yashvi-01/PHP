@@ -58,6 +58,12 @@ jobs:
 
           ssh -i ~/.ssh/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF
           rsync -avz --exclude='.git' ./ $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME
+
+          ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST_DNS << EOF
+             # Navigate to the directory
+            cd /home/$EC2_USE
+
+          
           aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
           docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
