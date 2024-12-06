@@ -58,7 +58,7 @@ jobs:
         run: |
            ssh -i  ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF
            echo "connected to ec2"
-           rsync -avz --exclude=".git" -e "ssh -i  ~/.test/key.pem -o StrictHostKeyChecking=no" ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
+           scp -i ~/.test/key.pem -r ./ "$EC2_USERNAME"@"$EC2_HOST":/var/www/html/
            sudo chown -R www-data:www-data /var/www/html/
            sudo chmod -R 755 /var/www/html/
              sudo systemctl start apache2
@@ -66,7 +66,7 @@ jobs:
            aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
            docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
-           docker run -d --name my-php-container -p 80:80 $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+           docker run -dit --name my-php-container -p 80:80 $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
              docker ps
             ls -l /home/$EC2_USERNAME
            EOF
