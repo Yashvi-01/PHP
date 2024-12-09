@@ -1,0 +1,72 @@
+name: deploy docker to EC2 and ECR
+
+on:
+  push:
+    branches:
+      - main  # This can be adjusted based on your need
+
+env:
+  EC2_HOST: ${{ secrets.EC2_HOST }}
+  EC2_USERNAME: ${{ secrets.USERNAME }}
+  EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
+  EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+  AWS_REGION: 'us-east-1'
+  ECR_REPOSITORY: 'yashvi/php'
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  IMAGE_TAG: latest
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Set up aws cli
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      - name: Build Docker image
+        run: | 
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+
+      - name: Tag Docker image for ECR
+        run: |
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Push Docker image to ECR
+        run: |
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Set up SSH client
+        run: |
+          sudo apt-get install -y openssh-client 
+          mkdir -p ~/.test
+          echo "$EC2_SSH_KEY" > ~/.test/key.pem
+          chmod 400 ~/.test/key.pem
+          ssh-keyscan -H "$EC2_HOST" >> ~/.test/known_hosts
+
+      - name: SSH into EC2 and run Docker container
+        run: |
+          ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF
+            echo "Pulling Docker image from ECR..."
+            docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+            echo "Docker images on EC2:"
+            docker images
+            echo "Running Docker container..."
+            docker run -d --name my-php-container -p 8080:80 768734223946.dkr.ecr.us-east-1.amazonaws.com/yashvi/php:latest
+            echo "Docker containers on EC2:"
+            sudo docker ps
+          EOF
+
+      - name: Verify Docker container is running on EC2
+        run: |
+          ssh -i  ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" "sudo docker ps"
