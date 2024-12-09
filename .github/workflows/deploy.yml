@@ -57,15 +57,18 @@ jobs:
       - name: SSH into EC2 and run Docker container
         run: |
           ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF
-            echo "Pulling Docker image from ECR..."
-            docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
-            echo "Docker images on EC2:"
-            docker images
-            echo "Running Docker container..."
-            docker run -d --name my-php-container -p 8080:80 768734223946.dkr.ecr.us-east-1.amazonaws.com/yashvi/php:latest
+            echo "Checking if Docker is running on EC2..."
+            sudo systemctl status docker || echo "Docker is not running."
+            
+            echo "Running Docker container with volume mapping..."
+            docker run -d --name my-php-container -p 8080:80 \
+              -v /var/www/html:/var/www/html \
+            768734223946.dkr.ecr.us-east-1.amazonaws.com/yashvi/php:latest || { echo 'Docker run failed!'; exit 1; }
+            
             echo "Docker containers on EC2:"
             sudo docker ps
           EOF
+
 
       - name: Verify Docker container is running on EC2
         run: |
