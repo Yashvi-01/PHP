@@ -47,8 +47,21 @@ jobs:
         run: |
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
 
+      - name: Remove Previous Images
+        run: | 
+          IMAGE_IDS=$(aws ecr describe-images --repository-name $ECR_REPOSITORY --query 'imageIds[?imageTag!=`latest`].imageDigest' --output text)
+          
+          if [ ! -z "$IMAGE_IDS" ]; then
+            echo "Deleting old images..."
+            for IMAGE_ID in $IMAGE_IDS; do
+              aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --image-ids imageDigest=$IMAGE_ID
+            done
+          else
+            echo "No old images to delete."
+          fi
+
       - name: Set up SSH client
-        run: |
+        run: |   
           sudo apt-get install -y openssh-client 
           mkdir -p ~/.test
           echo "$EC2_SSH_KEY" > ~/.test/key.pem
