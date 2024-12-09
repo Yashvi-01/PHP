@@ -47,19 +47,25 @@ jobs:
         run: |
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Delete old images from ECR
+      - name: Delete old images from ECR (excluding latest)
         run: |
-          IMAGE_IDS=$(aws ecr describe-images \
+            LATEST_IMAGE_DIGEST=$(aws ecr describe-images \
             --repository-name $ECR_REPOSITORY \
-            --query "imageDetails[?imageTags!='latest'].imageDigest" \
+            --query "imageDetails[?imageTags[?contains(@, 'latest')]].imageDigest" \
             --output text)
             
-          for IMAGE_ID in $IMAGE_IDS; do
+            IMAGE_IDS=$(aws ecr describe-images \
+            --repository-name $ECR_REPOSITORY \
+            --query "imageDetails[?imageDigest!='${LATEST_IMAGE_DIGEST}'].imageDigest" \
+            --output text)
+
+        
+            for IMAGE_ID in $IMAGE_IDS; do
             echo "Deleting image: $IMAGE_ID"
             aws ecr batch-delete-image \
               --repository-name $ECR_REPOSITORY \
               --image-ids imageDigest=$IMAGE_ID
-          done
+            done
 
       - name: Set up SSH client
         run: |   
