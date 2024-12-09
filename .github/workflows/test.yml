@@ -50,10 +50,10 @@ jobs:
       - name: Set up SSH client
         run: |
           sudo apt-get install -y openssh-client 
-            mkdir -p ~/.test
-            echo "$EC2_SSH_KEY" > ~/.test/key.pem
+          mkdir -p ~/.test
+          echo "$EC2_SSH_KEY" > ~/.test/key.pem
           chmod 400 ~/.test/key.pem
-            ssh-keyscan -H "$EC2_HOST" >> ~/.test/known_hosts
+          ssh-keyscan -H "$EC2_HOST" >> ~/.test/known_hosts
       
       - name: SSH into EC2 and run Docker container
         run: |
