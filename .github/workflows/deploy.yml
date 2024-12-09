@@ -8,7 +8,6 @@ on:
 env:
   EC2_HOST: ${{ secrets.EC2_HOST }}
   EC2_USERNAME: ${{ secrets.USERNAME }}
-  EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
   EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
   AWS_REGION: 'us-east-1'
   ECR_REPOSITORY: 'yashvi/php'
@@ -23,7 +22,7 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
-      - name: Set up aws cli
+      - name: Set up AWS CLI
         uses: aws-actions/configure-aws-credentials@v1
         with:
             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -54,21 +53,31 @@ jobs:
           chmod 400 ~/.test/key.pem
           ssh-keyscan -H "$EC2_HOST" >> ~/.test/known_hosts
 
-      - name: SSH into EC2 and run Docker container
+      - name: SSH into EC2, login to ECR, and run Docker container
         run: |
           ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF
             echo "Checking if Docker is running on EC2..."
             sudo systemctl status docker || echo "Docker is not running."
             
+            # Set AWS credentials (either via IAM role or passed manually here)
+            export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            export AWS_REGION=$AWS_REGION
+            
+            # Log in to ECR from EC2
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+            # Pull the Docker image from ECR
+            docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+            
             echo "Running Docker container with volume mapping..."
             docker run -d --name my-php-container -p 8080:80 \
               -v /var/www/html:/var/www/html \
-            768734223946.dkr.ecr.us-east-1.amazonaws.com/yashvi/php:latest || { echo 'Docker run failed!'; exit 1; }
+              $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG || { echo 'Docker run failed!'; exit 1; }
             
             echo "Docker containers on EC2:"
             sudo docker ps
           EOF
-
 
       - name: Verify Docker container is running on EC2
         run: |
