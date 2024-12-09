@@ -58,8 +58,8 @@ jobs:
       - name: SSH into EC2 and run Docker container
         run: |
            ssh -i ~/.test/key.pem -o StrictHostKeyChecking=no "$EC2_USERNAME"@"$EC2_HOST" <<EOF
-           sudo docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
-           sudo docker run -d --name my-php-container -p 8080:80 768734223946.dkr.ecr.us-east-1.amazonaws.com/yashvi/php:latest
+           docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+           docker run -d --name my-php-container -p 8080:80 768734223946.dkr.ecr.us-east-1.amazonaws.com/yashvi/php:latest
            sudo docker ps
            EOF
 
